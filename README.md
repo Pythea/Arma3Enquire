@@ -9,7 +9,7 @@ Linux Package Requirements:
 
 Python Package Requirements:
   beautifulsoup4, 
-  enquiries,
+  enquiries
   
 When first running the program with it is important to configure it to your setup. In order to do so there is a menu called Enquire Options which contains:
 
@@ -18,3 +18,4 @@ When first running the program with it is important to configure it to your setu
 * A steam workshop collection ID to download your mods from
 * The location for your server start script
  
+Note: This program currently only supports downloading mods from a steam collection, so one is required for this program to work at the moment.
