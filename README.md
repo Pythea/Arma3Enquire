@@ -15,7 +15,7 @@ This program assumes that you have a working Arma 3 Linux server. If you don't t
 
 When first running the program with it is important to configure it to your setup. In order to do so there is a menu called Enquire Options which contains:
 
-* The location for your arma 3 install directory
+* The location for your arma 3 install directory (This is the location that is used by force_install_dir in steamcmd)
 * The steam account used by steamcmd to download workshop mods
 * A steam workshop collection ID to download your mods from
 * The location for your server start script
