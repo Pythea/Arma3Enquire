@@ -12,6 +12,16 @@ class Settings:
         self.SCRIPT_LOCATION = modXML.getScriptLocation()
 
 def start():
+
+    print(""" _____                  _          
+|  ___|                (_)         
+| |__ _ __   __ _ _   _ _ _ __ ___ 
+|  __| '_ \ / _` | | | | | '__/ _ \\
+| |__| | | | (_| | |_| | | | |  __/
+\____/_| |_|\__, |\__,_|_|_|  \___|
+               | |                 
+               |_|                 """)
+
     mainOptions = ['Download Mods',"Preset Management", 'Enquire Options', 'Misc Options', 'Debug', 'Exit']
     response = enq.choose("What would you like to do?", mainOptions)
 
