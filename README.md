@@ -9,7 +9,8 @@ Linux Package Requirements:
 
 Python Package Requirements:
   beautifulsoup4, 
-  enquiries
+  enquiries,
+  requests
 
 This program assumes that you have a working Arma 3 Linux server. If you don't there are instructions <a href="https://community.bistudio.com/wiki/Arma_3:_Dedicated_Server">here</a> to set one up
 
