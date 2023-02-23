@@ -3,8 +3,6 @@ import enquiries as enq
 import modXML
 import steamEnq
 
-FileXT = '"-servermod=steamapps/workshop/content/107410/2162811561;"'
-
 class Settings:
     def __init__(self):
         self.INSTALL_DIR = modXML.getInstallDir()

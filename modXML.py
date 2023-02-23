@@ -2,7 +2,6 @@ from bs4 import BeautifulSoup
 from xml.etree import ElementTree
 import xml.etree.ElementTree as ET
 import requests
-import modXML
 
 def getTreeRoot():
     tree = ET.parse("data.xml")
@@ -12,7 +11,7 @@ def getTreeRoot():
 
 def getInfoFromCollection():
     # Downloads mod names and workshop ids from collection
-    COLLECTION_ID = modXML.getCollectionID()
+    COLLECTION_ID = getCollectionID()
     url = f"https://steamcommunity.com/sharedfiles/filedetails/?id={COLLECTION_ID}"
     page = requests.get(url)
     soup = BeautifulSoup(page.content, features="html.parser")
