@@ -4,6 +4,12 @@ import xml.etree.ElementTree as ET
 import requests
 import modXML
 
+def getTreeRoot():
+    tree = ET.parse("data.xml")
+    root = tree.getroot()
+    return (tree, root)
+
+
 def getInfoFromCollection():
     # Downloads mod names and workshop ids from collection
     COLLECTION_ID = modXML.getCollectionID()
@@ -127,6 +133,8 @@ def getSteamAccount():
 def getInstallDir():
     root = ET.parse("data.xml").getroot()
     gameFiles = root.find('options/gameFiles')
+    if gameFiles is None:
+        return "."
     return gameFiles.text
 
 def getCollectionID():
@@ -151,4 +159,32 @@ def setScriptLocation(newLocation):
     root = tree.getroot()
     scriptLocation = root.find('options/ScriptLocation')
     scriptLocation.text = newLocation
+    tree.write('data.xml')
+
+def getFileXT():
+    root = ET.parse("data.xml").getroot()
+    FileXT = root.find('options/FileXT')
+    if FileXT.text == "True":
+        return True
+    return False
+
+def setFileXT(newSetting):
+    tree = ET.parse("data.xml")
+    root = tree.getroot()
+    FileXT = root.find('options/FileXT')
+    FileXT.text = newSetting
+    tree.write('data.xml')
+
+def getAndProcBit():
+    root = ET.parse("data.xml").getroot()
+    Bit = root.find('options/Bit')
+    if Bit.text == "64":
+        return "_x64"
+    return ""
+
+def setBit(newSetting):
+    tree = ET.parse("data.xml")
+    root = tree.getroot()
+    Bit = root.find('options/Bit')
+    Bit.text = newSetting
     tree.write('data.xml')

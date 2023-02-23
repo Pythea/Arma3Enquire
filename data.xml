@@ -5,8 +5,10 @@
 	</presets>
 	<options>
 		<account></account>
-		<gameFiles></gameFiles>
+		<gameFiles>.</gameFiles>
 		<collectionID></collectionID>
-		<scriptLocation></scriptLocation>
+		<scriptLocation>.</scriptLocation>
+		<FileXT>False</FileXT>
+		<Bit>32</Bit>
 	</options>
 </root>

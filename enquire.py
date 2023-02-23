@@ -3,6 +3,7 @@ import enquiries as enq
 import modXML
 import steamEnq
 
+FileXT = '"-servermod=steamapps/workshop/content/107410/2162811561;"'
 
 class Settings:
     def __init__(self):
@@ -13,16 +14,7 @@ class Settings:
 
 def start():
 
-    print(""" _____                  _          
-|  ___|                (_)         
-| |__ _ __   __ _ _   _ _ _ __ ___ 
-|  __| '_ \ / _` | | | | | '__/ _ \\
-| |__| | | | (_| | |_| | | | |  __/
-\____/_| |_|\__, |\__,_|_|_|  \___|
-               | |                 
-               |_|                 """)
-
-    mainOptions = ['Download Mods',"Preset Management", 'Enquire Options', 'Misc Options', 'Debug', 'Exit']
+    mainOptions = ['Download Mods',"Preset Management", 'Misc Options', 'Enquire Options', 'Debug', 'Exit']
     response = enq.choose("What would you like to do?", mainOptions)
 
     if response == 'Exit':
@@ -85,7 +77,7 @@ def presetOptions():
             presetOptions()
         
         ids = modXML.getPresetIds(response)
-        writeToStartupScript(ids)
+        writeToStartupScript(True, ids)        
         text = enq.freetext(f"The mods from {response} has been applied to the arma startup script!")
         print(text)
         presetOptions()
@@ -119,6 +111,47 @@ def presetOptions():
     elif presetResponse == "Back":
         start()
 
+def miscOptions():
+    if modXML.getFileXT():
+        fileXT = "Disable File XT"
+    else:
+        fileXT = "Enable File XT"
+
+    options = ['Update Mod XML', fileXT, 'Set Server to 32 Bit', 'Set Server to 64 Bit', 'Back']
+    miscResponse = enq.choose("Misc Options: ", options)
+
+    if miscResponse == "Update Mod XML":
+        modInfo = modXML.getInfoFromCollection()
+        modXML.writeModsToTree(modInfo, True)
+        text = enq.freetext("XML Data Updated From Collection!")
+        print(text)
+        miscOptions()
+
+    elif miscResponse == "Disable File XT":
+        modXML.setFileXT("False")
+        writeToStartupScript(modChanges = False)
+        print("File XT has been disabled!")
+        miscOptions()
+    elif miscResponse == "Enable File XT":
+        modXML.setFileXT("True")
+        writeToStartupScript(modChanges = False)
+        print("File XT has been enabled!")
+        miscOptions()
+    
+    elif miscResponse == 'Set Server to 32 Bit':
+        modXML.setBit("32")
+        writeToStartupScript(modChanges = False)
+        print("Server Has Been Set to 32 Bit!")
+        miscOptions()
+    elif miscResponse == 'Set Server to 64 Bit':
+        modXML.setBit("64")
+        writeToStartupScript(modChanges = False)
+        print("Server Has Been Set to 64 Bit!")
+        miscOptions()
+
+    elif miscResponse == "Back":
+        start()
+
 def enquireOptions():
     options = ['Set Steam Account', 'Set Start Script Location', 'Set Install Directory', 'Set Collection ID', 'Back']
     enquireResponse = enq.choose("Enquire Options: ", options)
@@ -145,27 +178,6 @@ def enquireOptions():
     elif enquireResponse == "Back":
         start()
 
-def miscOptions():
-    options = ['Update Mod XML', 'Toggle File XT', 'Back']
-    miscResponse = enq.choose("Misc Options: ", options)
-    if miscResponse == "Update Mod XML":
-        modInfo = modXML.getInfoFromCollection()
-        modXML.writeModsToTree(modInfo, True)
-        text = enq.freetext("XML Data Updated From Collection!")
-        print(text)
-        miscOptions()
-    elif miscResponse == "Toggle File XT":
-        if FileXTToggle():
-            print("File XT has been enabled!")
-        else:
-            print("File XT has been disabled!")
-        miscOptions()
-
-    
-    elif miscResponse == "Back":
-        start()
-
-
 def debugOptions():
     options = ["Get Steam Account", "Get Game Files Base Dir", "Back"]
     debugResponse = enq.choose("Debug Options: ", options)
@@ -178,9 +190,8 @@ def debugOptions():
     elif debugResponse == "Back":
         start()
 
-
-
 def copyKeys():
+    #Copies the .bikeys from the mod directories to the arma base directory
     basedir = f"{settings.INSTALL_DIR}/steamapps/workshop/content/107410/"
 
     mods = os.listdir(basedir)
@@ -209,52 +220,48 @@ def allFilesToLower():
     os.system(cmd)
 
 
-def writeToStartupScript(mods):
+def writeToStartupScript(modChanges=False, mods=[]):
+    #Gets sent a list of mods, and applies them to the startup script based on settings
+    FileXT = ' "-servermod=steamapps/workshop/content/107410/2162811561;" '
     modBase = "steamapps/workshop/content/107410/"
-    check = FileXTCheck()
-    with open(f"{settings.SCRIPT_LOCATION}/arma3.sh", 'w') as file:
+
+    if not modXML.getFileXT():
+                FileXT = " "
+    Bit = modXML.getAndProcBit()
+    
+    if not modChanges:
+        #Reads the start script first before opening as write
+        with open(f"{settings.SCRIPT_LOCATION}/arma3.sh", 'r') as file:
+            fileSplit = file.readlines()
+        mods = fileSplit[2].split('"-mod=')[1]
+
+
+    with open(f"{settings.SCRIPT_LOCATION}/arma3.sh",'w') as file:
+        #Opens the start script as write and truncats the file before applying updates
         file.write("#!/bin/bash\n")
         file.write(f"cd {settings.INSTALL_DIR}\n")
-        if check:
-            lastWrite = f'screen -A -m -d -S arma3 ./arma3server -profiles={settings.INSTALL_DIR}/profiles -name=custom "-servermod=steamapps/workshop/content/107410/2162811561;" "-mod='
+
+        lastWrite = f'screen -A -m -d -S arma3 ./arma3server{Bit} -profiles={settings.INSTALL_DIR}/profiles -config=server.cfg -name=custom{FileXT}"-mod=' 
+        
+        if modChanges:
+            for mod in mods:
+                lastWrite +=  modBase + mod + ";" 
         else:
-            lastWrite = f'screen -A -m -d -S arma3 ./arma3server -profiles={settings.INSTALL_DIR}/profiles -name=custom "-mod='
-        for mod in mods:
-            lastWrite +=  modBase + mod + ";"
-        lastWrite += '" -config=server.cfg'
+           lastWrite += mods
+        lastWrite += '"'
+
         file.write(lastWrite)
-
-
-def FileXTCheck():
-    # Looks to see if FileXT is enabled or disabled in the server startup script
-    with open(f"{settings.SCRIPT_LOCATION}/arma3.sh", 'r') as file:
-        fileSplit = file.readlines()
-    if '"-servermod=steamapps/workshop/content/107410/2162811561;"' in fileSplit[2]:
-        return True
-    return False
-    
-
-def FileXTToggle():
-    # Checks FileXT, disables if it is enabled and vice versa
-    with open(f"{settings.SCRIPT_LOCATION}/arma3.sh", 'r') as file:
-        fileSplit = file.readlines()
-    mods = fileSplit[2].split('"-mod=')[1]
-    check = FileXTCheck()
-    with open(f"{settings.SCRIPT_LOCATION}/arma3.sh", 'w') as file:
-        if check:
-            file.write("#!/bin/bash\n")
-            file.write(f"cd {settings.INSTALL_DIR}\n")
-            lastWrite = f'screen -A -m -d -S arma3 ./arma3server -profiles={settings.INSTALL_DIR}/profiles -name=custom "-mod={mods}'
-            file.write(lastWrite)
-            return False
-        else:
-            file.write("#!/bin/bash\n")
-            file.write(f"cd {settings.INSTALL_DIR}\n")
-            lastWrite = f'screen -A -m -d -S arma3 ./arma3server -profiles={settings.INSTALL_DIR}/profiles -name=custom "-servermod=steamapps/workshop/content/107410/2162811561;" "-mod={mods}'
-            file.write(lastWrite)
-            return True
 
 
 if __name__ == "__main__":
     settings = Settings()
+    
+    print(""" _____                  _          
+|  ___|                (_)         
+| |__ _ __   __ _ _   _ _ _ __ ___ 
+|  __| '_ \ / _` | | | | | '__/ _ \\
+| |__| | | | (_| | |_| | | | |  __/
+\____/_| |_|\__, |\__,_|_|_|  \___|
+               | |                 
+               |_|                 """)
     start()
