@@ -201,7 +201,12 @@ def copyKeys():
             keys.append(os.listdir(basedir+f'{i}/keys')[0])
             fullPath.append(basedir+f'{i}/keys/{keys[-1]}')
         except FileNotFoundError:
-            print(f"Keys directory not found for mod id {i}, skipping")
+            try:
+                keys.append(os.listdir(basedir+f'{i}/key')[0])
+                fullPath.append(basedir+f'{i}/key/{keys[-1]}')
+            except FileNotFoundError:
+                print(f"Keys directory not found for mod id {i}, skipping")
+
 
 
     for i in range(len(keys)):
